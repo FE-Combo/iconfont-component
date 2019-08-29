@@ -1,0 +1,9 @@
+.idea/
+.vscode/
+/.gradle/
+output*/
+*.iml
+/classes/
+.DS_Store
+node_modules/
+/*/yarn-error.log
