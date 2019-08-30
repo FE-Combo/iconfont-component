@@ -8,7 +8,7 @@ const childProcess = require("child_process");
 
 const htmlBoilerplatePath = path.resolve(__dirname, "./icon.html");
 const lessBoilerplatePath = path.resolve(__dirname, "./iconfont.less");
-const componentBoilerplatePath = path.resolve(__dirname, "./Component.tsx");
+const componentBoilerplatePath = path.resolve(__dirname, "./Icon.tsx");
 
 let cssPath;
 let assetFolderPath;
