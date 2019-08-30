@@ -6,14 +6,17 @@ const yargs = require("yargs");
 const Agent = require("https").Agent;
 const childProcess = require("child_process");
 
-const htmlBoilerplatePath = path.resolve(__dirname, "./icon.html");
-const lessBoilerplatePath = path.resolve(__dirname, "./iconfont.less");
-const componentBoilerplatePath = path.resolve(__dirname, "./Icon.tsx");
-
 let cssPath;
 let assetFolderPath;
 let componentPath;
 let htmlPath;
+let cssStyle; // 0=>less,1=>scss
+let prettierConfig = require("./prettier.json");
+
+const htmlBoilerplatePath = path.resolve(__dirname, "./template/icon.html");
+const lessBoilerplatePath = path.resolve(__dirname, "./template/iconfont.less");
+const scssBoilerplatePath = path.resolve(__dirname, "./template/iconfont.scss");
+const componentBoilerplatePath = path.resolve(__dirname, "./template/Icon.tsx");
 
 function analyzeCSS(content) {
   // Process icon items
@@ -33,7 +36,7 @@ function analyzeCSS(content) {
     .match(/url\('(.|\n)*?'\)/g)
     .map(_ => _.substring(5, _.length - 2));
   let lessContent = fs
-    .readFileSync(lessBoilerplatePath)
+    .readFileSync(cssStyle === 0 ? lessBoilerplatePath : scssBoilerplatePath)
     .toString()
     .replace(
       `"{1}"`,
@@ -160,6 +163,7 @@ async function generate(env) {
     assetFolderPath = env.iconFontFilePath;
     componentPath = env.iconComponentPath;
     htmlPath = env.iconHTMLPath;
+    cssStyle = env.cssStyle || 0;
 
     const cssContent = await getContent(cssURL);
     console.info(chalk`{white.bold 😍 CSS file content loaded}`);
@@ -171,10 +175,15 @@ async function generate(env) {
     generatePreviewHtml(iconClassList, cssURL);
     console.info(chalk`{white.bold 😍 Generated HTML for preview}`);
 
-    spawn("prettier", ["--config", env.prettierConfig, "--write", cssPath]);
     spawn("prettier", [
       "--config",
-      env.prettierConfig,
+      env.prettierConfig || prettierConfig,
+      "--write",
+      cssPath
+    ]);
+    spawn("prettier", [
+      "--config",
+      env.prettierConfig || prettierConfig,
       "--write",
       componentPath
     ]);
