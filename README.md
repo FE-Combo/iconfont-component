@@ -1,6 +1,6 @@
 # 动机
 
-- 组件化 Icon，自动化实现 iconfont.cn 的 icon
+- 组件化 Icon，自动化生成 iconfont.cn 的 icon
 
 # 约定
 
