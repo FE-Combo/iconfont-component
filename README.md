@@ -6,7 +6,7 @@
 
 - iconfont 的命名以 icon-为前缀
 - 命名连接符使用-
-- 样式暂时只支持生成 less 与 scss 的形式
+- 样式暂时只支持生成 less 与 scss 的形式，默认值为 1（0=>less,1=>scss）
 - 暂时只只支持使用 ts
 
 # 使用
@@ -30,4 +30,4 @@
     generate(iconGenerateConfig)
   ```
 - package.json 的 script 新增 "icon": "node icon.js"
-- 生成 icon：命令行输入`yarn icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css`
+- 生成 icon：命令行输入`yarn icon [iconfont.css]`. eg: `yarn icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css` OR `npm run icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css`

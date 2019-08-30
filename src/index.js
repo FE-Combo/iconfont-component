@@ -92,10 +92,16 @@ function transformToLocalURL(url) {
     const assetExtension = getExtension(url);
     if (assetExtension === "ttf") {
       downloadFontAsset(url, "iconfont.ttf");
-      return `url("${assetFolderPath}/iconfont.ttf") format("truetype")`;
+      return `url("${path.relative(
+        cssPath,
+        assetFolderPath
+      )}\\iconfont.ttf") format("truetype")`;
     } else if (assetExtension === "woff") {
       downloadFontAsset(url, "iconfont.woff");
-      return `url("${assetFolderPath}/iconfont.woff") format("woff")`;
+      return `url("${path.relative(
+        cssPath,
+        assetFolderPath
+      )}\\iconfont.woff") format("woff")`;
     } else {
       return null;
     }
