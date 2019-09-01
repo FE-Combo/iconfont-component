@@ -5,20 +5,12 @@ const path = require("path");
 const yargs = require("yargs");
 const Agent = require("https").Agent;
 const childProcess = require("child_process");
-
-let cssPath;
-let assetFolderPath;
-let componentPath;
-let htmlPath;
-let cssStyle; // 0=>less,1=>scss
-let prettierConfig = require("./prettier.json");
-
 const htmlBoilerplatePath = path.resolve(__dirname, "./template/icon.html");
 const lessBoilerplatePath = path.resolve(__dirname, "./template/iconfont.less");
 const scssBoilerplatePath = path.resolve(__dirname, "./template/iconfont.scss");
 const componentBoilerplatePath = path.resolve(__dirname, "./template/Icon.tsx");
 
-function analyzeCSS(content) {
+function analyzeCSS(content, config) {
   // Process icon items
   const classList = content
     .match(/\.icon-(.*)\:before/g)
@@ -35,8 +27,10 @@ function analyzeCSS(content) {
   const assetURLs = content
     .match(/url\('(.|\n)*?'\)/g)
     .map(_ => _.substring(5, _.length - 2));
-  let lessContent = fs
-    .readFileSync(cssStyle === 0 ? lessBoilerplatePath : scssBoilerplatePath)
+  let cssContent = fs
+    .readFileSync(
+      config.cssStyle === 0 ? lessBoilerplatePath : scssBoilerplatePath
+    )
     .toString()
     .replace(
       `"{1}"`,
@@ -45,18 +39,18 @@ function analyzeCSS(content) {
         .filter(_ => _)
         .join(",")
     );
-  lessContent = lessContent.replace(
+  cssContent = cssContent.replace(
     `// {2}`,
     content.match(/\.icon-(.|\n)*?\}/g).join("\n")
   );
 
-  fs.writeFileSync(componentPath, componentContent);
-  fs.writeFileSync(cssPath, lessContent);
+  fs.writeFileSync(config.componentPath, componentContent);
+  fs.writeFileSync(config.cssPath, cssContent);
 
   return classList;
 }
 
-function generatePreviewHtml(iconList, cssURL) {
+function generatePreviewHtml(iconList, cssURL, config) {
   const icons = iconList.map(
     _ =>
       `<div class="item"><i class="iconfont ${_}"></i><span>${classNameToEnum(
@@ -64,7 +58,7 @@ function generatePreviewHtml(iconList, cssURL) {
       )}</span></div>`
   );
   fs.writeFileSync(
-    htmlPath,
+    config.htmlPath,
     fs
       .readFileSync(htmlBoilerplatePath)
       .toString()
@@ -85,7 +79,8 @@ function classNameToEnum(className) {
     .toUpperCase();
 }
 
-function transformToLocalURL(url) {
+function transformToLocalURL(url, config) {
+  const { cssPath, assetFolderPath } = config;
   if (url.startsWith("data:application/x-font-woff2;")) {
     return `url("${url}") format("woff")`;
   } else {
@@ -165,38 +160,44 @@ async function generate(env) {
 
   try {
     if (!cssURL) throw new Error("Missing CSS URL in command line");
-    cssPath = env.iconCssPath;
-    assetFolderPath = env.iconFontFilePath;
-    componentPath = env.iconComponentPath;
-    htmlPath = env.iconHTMLPath;
-    cssStyle = env.cssStyle || 0;
+    // TODO: check params if null
+    const config = {
+      https: env.https || false,
+      port: env.port || 3000,
+      cssPath: env.iconCssPath,
+      assetFolderPath: env.iconFontFilePath,
+      componentPath: env.iconComponentPath,
+      htmlPath: env.iconHTMLPath,
+      cssStyle: env.cssStyle || 0,
+      prettierConfig: env.prettierConfig || require("./prettier.json")
+    };
 
     const cssContent = await getContent(cssURL);
     console.info(chalk`{white.bold 😍 CSS file content loaded}`);
-    const iconClassList = analyzeCSS(cssContent);
+    const iconClassList = analyzeCSS(cssContent, config);
     console.info(
       chalk`{white.bold 😍 Generated ${iconClassList.length} icons}`
     );
 
-    generatePreviewHtml(iconClassList, cssURL);
+    generatePreviewHtml(iconClassList, cssURL, config);
     console.info(chalk`{white.bold 😍 Generated HTML for preview}`);
 
     spawn("prettier", [
       "--config",
-      env.prettierConfig || prettierConfig,
+      config.prettierConfig,
       "--write",
-      cssPath
+      config.cssPath
     ]);
     spawn("prettier", [
       "--config",
-      env.prettierConfig || prettierConfig,
+      config.prettierConfig,
       "--write",
-      componentPath
+      config.componentPath
     ]);
     console.info(chalk`{white.bold 💕 Format generated files}`);
     console.info(
-      chalk`show on {green ${env.https ? "https" : "http"}://localhost:${
-        env.port
+      chalk`show on {green ${config.https ? "https" : "http"}://localhost:${
+        config.port
       }/} \n`
     );
   } catch (e) {
