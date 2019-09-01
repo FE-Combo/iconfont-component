@@ -32,3 +32,4 @@
   ```
   - package.json 的 script 新增 "icon": "node icon.js"
   - 生成 icon：命令行输入`yarn icon [iconfont.css]`. e.g: `yarn icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css` OR `npm run icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css`
+  - 直接引用组件 Icon 使用

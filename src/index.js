@@ -7,11 +7,11 @@ const Agent = require("https").Agent;
 const childProcess = require("child_process");
 const htmlBoilerplatePath = path.resolve(__dirname, "./template/icon.html");
 const lessBoilerplatePath = path.resolve(__dirname, "./template/iconfont.less");
-const scssBoilerplatePath = path.resolve(__dirname, "./template/iconfont.scss");
 const componentBoilerplatePath = path.resolve(__dirname, "./template/Icon.tsx");
 
 function analyzeCSS(content, config) {
   // Process icon items
+  const { componentPath, cssPath } = config;
   const classList = content
     .match(/\.icon-(.*)\:before/g)
     .map(_ => _.substr(1).replace(":before", ""));
@@ -21,21 +21,20 @@ function analyzeCSS(content, config) {
     .replace(
       "// {1}",
       classList.map(_ => `${classNameToEnum(_)} = "${_}",`).join("\n")
-    );
+    )
+    .replace("{2}", path.relative(path.join(componentPath, ".."), cssPath));
 
   // Process URLs (assets)
   const assetURLs = content
     .match(/url\('(.|\n)*?'\)/g)
     .map(_ => _.substring(5, _.length - 2));
   let cssContent = fs
-    .readFileSync(
-      config.cssStyle === 0 ? lessBoilerplatePath : scssBoilerplatePath
-    )
+    .readFileSync(lessBoilerplatePath)
     .toString()
     .replace(
       `"{1}"`,
       assetURLs
-        .map(url => transformToLocalURL(url))
+        .map(url => transformToLocalURL(url, config))
         .filter(_ => _)
         .join(",")
     );
@@ -43,14 +42,14 @@ function analyzeCSS(content, config) {
     `// {2}`,
     content.match(/\.icon-(.|\n)*?\}/g).join("\n")
   );
-
-  fs.writeFileSync(config.componentPath, componentContent);
-  fs.writeFileSync(config.cssPath, cssContent);
+  fs.writeFileSync(componentPath, componentContent);
+  fs.writeFileSync(cssPath, cssContent);
 
   return classList;
 }
 
 function generatePreviewHtml(iconList, cssURL, config) {
+  const { htmlPath } = config;
   const icons = iconList.map(
     _ =>
       `<div class="item"><i class="iconfont ${_}"></i><span>${classNameToEnum(
@@ -58,7 +57,7 @@ function generatePreviewHtml(iconList, cssURL, config) {
       )}</span></div>`
   );
   fs.writeFileSync(
-    config.htmlPath,
+    htmlPath,
     fs
       .readFileSync(htmlBoilerplatePath)
       .toString()
@@ -85,18 +84,13 @@ function transformToLocalURL(url, config) {
     return `url("${url}") format("woff")`;
   } else {
     const assetExtension = getExtension(url);
+    const fontPath = path.relative(path.join(cssPath, ".."), assetFolderPath);
     if (assetExtension === "ttf") {
-      downloadFontAsset(url, "iconfont.ttf");
-      return `url("${path.relative(
-        cssPath,
-        assetFolderPath
-      )}\\iconfont.ttf") format("truetype")`;
+      downloadFontAsset(url, "iconfont.ttf", config);
+      return `url("${fontPath}/iconfont.ttf") format("truetype")`;
     } else if (assetExtension === "woff") {
-      downloadFontAsset(url, "iconfont.woff");
-      return `url("${path.relative(
-        cssPath,
-        assetFolderPath
-      )}\\iconfont.woff") format("woff")`;
+      downloadFontAsset(url, "iconfont.woff", config);
+      return `url("${fontPath}/iconfont.woff") format("woff")`;
     } else {
       return null;
     }
@@ -110,7 +104,8 @@ function getExtension(url) {
   return extension.toLowerCase();
 }
 
-async function downloadFontAsset(url, fileName) {
+async function downloadFontAsset(url, fileName, config) {
+  const { assetFolderPath } = config;
   if (!fs.existsSync(assetFolderPath)) {
     fs.mkdirSync(assetFolderPath);
   }
@@ -138,7 +133,9 @@ function spawn(command, arguments) {
   const result = childProcess.spawnSync(
     isWindows ? command + ".cmd" : command,
     arguments,
-    { stdio: "inherit" }
+    {
+      stdio: "inherit"
+    }
   );
   if (result.error) {
     console.error(result.error);
@@ -168,8 +165,8 @@ async function generate(env) {
       assetFolderPath: env.iconFontFilePath,
       componentPath: env.iconComponentPath,
       htmlPath: env.iconHTMLPath,
-      cssStyle: env.cssStyle || 0,
-      prettierConfig: env.prettierConfig || require("./prettier.json")
+      prettierConfig:
+        env.prettierConfig || path.resolve(__dirname, "../prettier.json")
     };
 
     const cssContent = await getContent(cssURL);
