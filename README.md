@@ -1,4 +1,4 @@
-[![npm version](https://img.shields.io/npm/v/doreact.svg?style=flat)](https://www.npmjs.com/package/iconfont-component)
+[![npm version](https://img.shields.io/npm/v/iconfont-component.svg?style=flat)](https://www.npmjs.com/package/iconfont-component)
 
 # 动机
 
