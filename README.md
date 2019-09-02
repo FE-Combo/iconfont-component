@@ -16,20 +16,19 @@
 - 项目配置：
   - 根目录下生成 icon.js 文件
   ```
-    const generate = require('iconfont-component');
-    const path = require('path');
-    function resolve(relativePath) {
-        return path.resolve(\_\_dirname, `./${relativePath}`)
-    }
-    const iconGenerateConfig = {
-        iconHTMLPath: resolve('./icon.html'),
-        iconCssPath: resolve('./icon.less'),
-        iconFontFilePath: resolve('./font'),
-        iconComponentPath: resolve('./Icon.tsx'),
-        styleType: 1, // 0 代表 less, 1 代表scss
-    }
-    generate(iconGenerateConfig)
+   const generate = require('iconfont-component')
+  const path = require('path')
+  function resolve(relativePath) {
+  return path.resolve(\_\_dirname, `${relativePath}`)
+  }
+  const iconGenerateConfig = {
+  iconHTMLPath: resolve('./icon.html'),
+  iconCssPath: resolve('./client/styles/icon.css'),
+  iconFontFilePath: resolve('./client/static/fonts'),
+  iconComponentPath: resolve('./client/components/common/Icon/index.tsx'),
+  }
+  generate(iconGenerateConfig)
   ```
-  - package.json 的 script 新增 "icon": "node icon.js"
-  - 生成 icon：命令行输入`yarn icon [iconfont.css]`. e.g: `yarn icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css` OR `npm run icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css`
-  - 直接引用组件 Icon 使用
+- package.json 的 script 新增 "icon": "node icon.js"
+- 生成 icon：命令行输入`yarn icon [iconfont.css]`. e.g: `yarn icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css` OR `npm run icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css`
+- 直接引用组件 Icon 使用

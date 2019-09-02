@@ -91,6 +91,9 @@ function transformToLocalURL(url, config) {
     } else if (assetExtension === "woff") {
       downloadFontAsset(url, "iconfont.woff", config);
       return `url("${fontPath}/iconfont.woff") format("woff")`;
+    } else if (assetExtension === "svg") {
+      downloadFontAsset(url, "iconfont.svg", config);
+      return `url("${fontPath}/iconfont.svg") format("svg")`;
     } else {
       return null;
     }
@@ -176,8 +179,10 @@ async function generate(env) {
       chalk`{white.bold 😍 Generated ${iconClassList.length} icons}`
     );
 
-    generatePreviewHtml(iconClassList, cssURL, config);
-    console.info(chalk`{white.bold 😍 Generated HTML for preview}`);
+    if (config.htmlPath) {
+      generatePreviewHtml(iconClassList, cssURL, config);
+      console.info(chalk`{white.bold 😍 Generated HTML for preview}`);
+    }
 
     spawn("prettier", [
       "--config",
