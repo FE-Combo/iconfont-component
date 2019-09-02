@@ -14,7 +14,7 @@
 
 # 使用
 
-- 安装：`yarn add iconfont-component --save` OR `npm install iconfont-component --save`
+- 安装：`yarn add iconfont-component --dev` OR `npm install iconfont-component --dev`
 
 - 项目配置：
   - 根目录下生成 icon.js 文件
