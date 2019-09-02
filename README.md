@@ -1,3 +1,5 @@
+[![npm version](https://img.shields.io/npm/v/doreact.svg?style=flat)](https://www.npmjs.com/package/doReact)
+
 # 动机
 
 - 组件化 Icon，由 iconfont.cn 自动生成 Icon Component
