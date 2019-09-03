@@ -22,10 +22,8 @@
 
 # 使用
 
-- 安装：`yarn add iconfont-component --dev` OR `npm install iconfont-component --dev`
-
+- 安装：`yarn add iconfont-component --dev`
 - 项目配置：
-
   - 根目录下生成 icon.js 文件
 
   ```
@@ -43,7 +41,6 @@
     generate(iconGenerateConfig)
 
   ```
-
 - package.json 的 script 新增 "icon": "node icon.js"
-- 生成 icon：命令行输入`yarn icon [iconfont.css]`. e.g: `yarn icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css` OR `npm run icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css`
-- 直接引用组件 Icon 使用
+- 生成 icon：命令行输入`yarn icon [iconfont.css]`. e.g: `yarn icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css`
+- 使用：引用组件 Icon
