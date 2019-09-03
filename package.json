@@ -1,6 +1,6 @@
 {
   "name": "iconfont-component",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Generate Icon with React in iconfont.cn",
   "main": "src/index.js",
   "scripts": {
