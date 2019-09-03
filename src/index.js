@@ -11,20 +11,23 @@ const componentBoilerplatePath = path.resolve(__dirname, "./template/Icon.tsx");
 
 function analyzeCSS(content, config) {
   // Process icon items
-  const { componentPath, cssPath } = config;
+  const { componentPath, cssPath, namespace } = config;
+  const matchIconRegex = new RegExp(`\\.${namespace}-(.*)\\:before`, "g");
   const classList = content
-    .match(/\.icon-(.*)\:before/g)
+    .match(matchIconRegex)
     .map(_ => _.substr(1).replace(":before", ""));
   const componentContent = fs
     .readFileSync(componentBoilerplatePath)
     .toString()
     .replace(
       "// {1}",
-      classList.map(_ => `${classNameToEnum(_)} = "${_}",`).join("\n")
+      classList.map(_ => `${classNameToEnum(_, config)} = "${_}",`).join("\n")
     )
-    .replace("{2}", path.relative(path.join(componentPath, ".."), cssPath));
+    .replace("{2}", path.relative(path.join(componentPath, ".."), cssPath))
+    .replace(/\{3\}/g, namespace);
 
   // Process URLs (assets)
+  const assetIconRegex = new RegExp(`\\.${namespace}-(.|\\n)*?\\}`, "g");
   const assetURLs = content
     .match(/url\('(.|\n)*?'\)/g)
     .map(_ => _.substring(5, _.length - 2));
@@ -32,16 +35,15 @@ function analyzeCSS(content, config) {
     .readFileSync(lessBoilerplatePath)
     .toString()
     .replace(
-      `"{1}"`,
+      "{1}",
       assetURLs
         .map(url => transformToLocalURL(url, config))
         .filter(_ => _)
         .join(",")
-    );
-  cssContent = cssContent.replace(
-    `// {2}`,
-    content.match(/\.icon-(.|\n)*?\}/g).join("\n")
-  );
+    )
+    .replace(`// {2}`, content.match(assetIconRegex).join("\n"))
+    .replace(/\{3\}/g, namespace);
+
   fs.writeFileSync(componentPath, componentContent);
   fs.writeFileSync(cssPath, cssContent);
 
@@ -49,11 +51,12 @@ function analyzeCSS(content, config) {
 }
 
 function generatePreviewHtml(iconList, cssURL, config) {
-  const { htmlPath } = config;
+  const { htmlPath, namespace } = config;
   const icons = iconList.map(
     _ =>
       `<div class="item"><i class="iconfont ${_}"></i><span>${classNameToEnum(
-        _
+        _,
+        config
       )}</span></div>`
   );
   fs.writeFileSync(
@@ -64,11 +67,14 @@ function generatePreviewHtml(iconList, cssURL, config) {
       .replace("{1}", cssURL)
       .replace("{2}", icons.join(""))
       .replace("{3}", new Date().toLocaleString())
+      .replace("{4}", namespace)
   );
 }
 
-function classNameToEnum(className) {
-  if (!/^icon\-[a-z\d]+(-[a-z\d]+)*$/.test(className)) {
+function classNameToEnum(className, config) {
+  const { namespace } = config;
+  const regex = new RegExp(`^${namespace}\\-[a-z\\d]+(-[a-z\\d]+)*$`);
+  if (!regex.test(className)) {
     throw new Error(`${className} does not conform to naming convention`);
   }
 
@@ -164,6 +170,8 @@ async function generate(env) {
     const config = {
       https: env.https || false,
       port: env.port || 3000,
+      iconPrefix: env.prefix || "iconfont",
+      namespace: env.namespace || "iconfont",
       cssPath: env.iconCssPath,
       assetFolderPath: env.iconFontFilePath,
       componentPath: env.iconComponentPath,
