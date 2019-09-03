@@ -6,7 +6,7 @@ const yargs = require("yargs");
 const Agent = require("https").Agent;
 const childProcess = require("child_process");
 const htmlBoilerplatePath = path.resolve(__dirname, "./template/icon.html");
-const lessBoilerplatePath = path.resolve(__dirname, "./template/iconfont.less");
+const cssBoilerplatePath = path.resolve(__dirname, "./template/iconfont.css");
 const componentBoilerplatePath = path.resolve(__dirname, "./template/Icon.tsx");
 
 function analyzeCSS(content, config) {
@@ -16,6 +16,8 @@ function analyzeCSS(content, config) {
   const classList = content
     .match(matchIconRegex)
     .map(_ => _.substr(1).replace(":before", ""));
+
+  // {1}: Icon types {2}: css url {3}: namespace
   const componentContent = fs
     .readFileSync(componentBoilerplatePath)
     .toString()
@@ -31,11 +33,12 @@ function analyzeCSS(content, config) {
   const assetURLs = content
     .match(/url\('(.|\n)*?'\)/g)
     .map(_ => _.substring(5, _.length - 2));
-  let cssContent = fs
-    .readFileSync(lessBoilerplatePath)
+  // {1}: fonts url {2}: icon style {3}: namespace
+  const cssContent = fs
+    .readFileSync(cssBoilerplatePath)
     .toString()
     .replace(
-      "{1}",
+      `'{1}'`,
       assetURLs
         .map(url => transformToLocalURL(url, config))
         .filter(_ => _)
@@ -59,6 +62,8 @@ function generatePreviewHtml(iconList, cssURL, config) {
         config
       )}</span></div>`
   );
+
+  // {1}: css url {2}: content {3}: date  {4}: namespace
   fs.writeFileSync(
     htmlPath,
     fs
@@ -205,11 +210,11 @@ async function generate(env) {
       config.componentPath
     ]);
     console.info(chalk`{white.bold 💕 Format generated files}`);
-    console.info(
-      chalk`show on {green ${config.https ? "https" : "http"}://localhost:${
-        config.port
-      }/} \n`
-    );
+    // console.info(
+    //   chalk`show on {green ${config.https ? "https" : "http"}://localhost:${
+    //     config.port
+    //   }/} \n`
+    // );
   } catch (e) {
     console.error(chalk`{red.bold ❌ Error: ${e.message}}`);
     process.exit(1);
