@@ -13,7 +13,7 @@
 
 # 约定
 
-- 仅适用于 ts 项目
+- 仅适用于 react/ts 项目
 
 - font-family 的命名必须为 [namespace]
 - FontClass/Symbol 前缀必须为 [namespace]-
