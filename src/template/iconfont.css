@@ -13,19 +13,4 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.{3}-with-text-on-left,
-.{3}-with-text-on-right {
-  display: inline-flex;
-  align-items: center;
-  vertical-align: top;
-}
-
-.{3}-with-text-on-left > .{3} {
-  margin-left: 5px;
-}
-
-.{3}-with-text-on-right > .{3} {
-  margin-right: 5px;
-}
-
 // {2}

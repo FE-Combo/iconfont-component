@@ -1,7 +1,7 @@
 {
   "name": "iconfont-component",
   "version": "0.0.7",
-  "description": "Generate Icon with React in iconfont.cn",
+  "description": "Automatically generate components based on iconfont.cn",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
