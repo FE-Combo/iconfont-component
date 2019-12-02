@@ -9,6 +9,10 @@ const htmlBoilerplatePath = path.resolve(__dirname, "./template/icon.html");
 const cssBoilerplatePath = path.resolve(__dirname, "./template/iconfont.css");
 const componentBoilerplatePath = path.resolve(__dirname, "./template/Icon.tsx");
 
+function checkIfExistsFile(path) {
+  return fs.existsSync(path);
+}
+
 function analyzeCSS(content, config) {
   // Process icon items
   const { componentPath, cssPath, namespace } = config;
@@ -53,6 +57,10 @@ function analyzeCSS(content, config) {
     .replace(`// {2}`, content.match(assetIconRegex).join("\n"))
     .replace(/\{3\}/g, namespace);
 
+  if (!checkIfExistsFile(componentPath)) {
+    fs.createFileSync(componentPath);
+  }
+
   fs.writeFileSync(componentPath, componentContent);
   fs.writeFileSync(cssPath, cssContent);
 
@@ -90,7 +98,7 @@ function classNameToEnum(className, config) {
   }
 
   return className
-    .substring(5)
+    .substring(namespace.length + 1)
     .replace(/-/g, "_")
     .toUpperCase();
 }
