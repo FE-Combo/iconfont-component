@@ -13,9 +13,15 @@ function analyzeCSS(content, config) {
   // Process icon items
   const { componentPath, cssPath, namespace } = config;
   const matchIconRegex = new RegExp(`\\.${namespace}-(.*)\\:before`, "g");
-  const classList = content
-    .match(matchIconRegex)
-    .map(_ => _.substr(1).replace(":before", ""));
+
+  const contentMatchIcon = content.match(matchIconRegex);
+  if (!contentMatchIcon)
+    throw new Error(
+      `Error occurred, it perhaps caused by wrong configuration of iconfont.cn, please check: 1."fontclass / symbol prefix" must be ${config.namespace}-; 2."Font Family" must be ${config.namespace}`
+    );
+  const classList = contentMatchIcon.map(_ =>
+    _.substr(1).replace(":before", "")
+  );
 
   // {1}: Icon types {2}: css url {3}: namespace
   const componentContent = fs
@@ -173,9 +179,6 @@ async function generate(env) {
     if (!cssURL) throw new Error("Missing CSS URL in command line");
     // TODO: check params if null
     const config = {
-      https: env.https || false,
-      port: env.port || 3000,
-      iconPrefix: env.prefix || "iconfont",
       namespace: env.namespace || "iconfont",
       cssPath: env.iconCssPath,
       assetFolderPath: env.iconFontFilePath,
@@ -210,11 +213,6 @@ async function generate(env) {
       config.componentPath
     ]);
     console.info(chalk`{white.bold 💕 Format generated files}`);
-    // console.info(
-    //   chalk`show on {green ${config.https ? "https" : "http"}://localhost:${
-    //     config.port
-    //   }/} \n`
-    // );
   } catch (e) {
     console.error(chalk`{red.bold ❌ Error: ${e.message}}`);
     process.exit(1);
