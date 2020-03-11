@@ -179,21 +179,37 @@ function spawn(command, arguments) {
   }
 }
 
-async function generate(env) {
+function getConfig() {
+  try {
+    const config = fs.readFileSync(process.cwd() + "/.iconrc.json");
+    return JSON.parse(config);
+  } catch (error) {
+    console.error(chalk`{red.bold ❌ Error: Uninitialized .iconrc.json}`);
+  }
+}
+
+function getConfigPath(url) {
+  return url ? path.resolve(process.cwd(), url) : undefined;
+}
+
+async function generate() {
   console.info(chalk`{white.bold usage:} 🎈 yarn icon \{icon-font-css-url\}`);
   const cssURL = yargs.argv._[0];
 
   try {
     if (!cssURL) throw new Error("Missing CSS URL in command line");
     // TODO: check params if null
+
+    const configJSON = getConfig();
     const config = {
-      namespace: env.namespace || "iconfont",
-      cssPath: env.iconCssPath,
-      assetFolderPath: env.iconFontFilePath,
-      componentPath: env.iconComponentPath,
-      htmlPath: env.iconHTMLPath,
+      namespace: configJSON.namespace || "iconfont",
+      cssPath: getConfigPath(configJSON.iconCssPath),
+      assetFolderPath: getConfigPath(configJSON.iconFontFilePath),
+      componentPath: getConfigPath(configJSON.iconComponentPath),
+      htmlPath: getConfigPath(configJSON.iconHTMLPath),
       prettierConfig:
-        env.prettierConfig || path.resolve(__dirname, "../prettier.json")
+        getConfigPath(configJSON.prettierConfig) ||
+        path.resolve(__dirname, "../prettier.json")
     };
 
     const cssContent = await getContent(cssURL);
@@ -227,4 +243,4 @@ async function generate(env) {
   }
 }
 
-module.exports = generate;
+generate();
