@@ -181,13 +181,18 @@ function spawn(command, arguments) {
 
 async function generate(env) {
   console.info(chalk`{white.bold usage:} 🎈 yarn icon \{icon-font-css-url\}`);
-  const cssURL = yargs.argv._[0];
+  const url = yargs.argv._[0];
 
   try {
-    if (!cssURL) throw new Error("Missing CSS URL in command line");
+    if (!url) throw new Error("Missing CSS URL in command line");
+
+    const cssURL = url.replace(/(\.css)|(\.js)$/, "").concat(".css");
+    const jsURL = url.replace(/(\.css)|(\.js)$/, "").concat(".js");
+
     // TODO: check params if null
     const config = {
       namespace: env.namespace || "iconfont",
+      jsPath: env.iconJsPath,
       cssPath: env.iconCssPath,
       assetFolderPath: env.iconFontFilePath,
       componentPath: env.iconComponentPath,
@@ -202,6 +207,11 @@ async function generate(env) {
     console.info(
       chalk`{white.bold 😍 Generated ${iconClassList.length} icons}`
     );
+
+    const jsContent = await getContent(jsURL);
+    console.info(chalk`{white.bold 😍 JS file content loaded}`);
+    fs.writeFileSync(config.jsPath, jsContent);
+    console.info(chalk`{white.bold 😍 Generated JS}`);
 
     if (config.htmlPath) {
       generatePreviewHtml(iconClassList, cssURL, config);

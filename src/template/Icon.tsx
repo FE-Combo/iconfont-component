@@ -11,6 +11,7 @@ export enum IconClass {
 
 interface Props extends AllHTMLAttributes<HTMLElement> {
   type: IconClass;
+  symbol: boolean;
 }
 
 export default class Component extends React.PureComponent<Props> {
