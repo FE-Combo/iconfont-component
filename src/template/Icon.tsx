@@ -5,7 +5,7 @@ import "{2}";
 */
 
 export enum IconClass {
-  // {1}
+// {1}
 }
 
 
@@ -14,8 +14,28 @@ interface Props extends AllHTMLAttributes<HTMLElement> {
 }
 
 export default class Component extends React.PureComponent<Props> {
+  static defaultProps = {
+    symbol: false
+  };
+
   render() {
-    const { type, className = "", ...restProps } = this.props;
-    return <i className={`{3} ${type} ${className}`} {...restProps} />;
+    const { type, symbol, className = "", ...restProps } = this.props;
+    return symbol ? (
+      <svg
+        className={`{3} ${className}`}
+        style={{
+          width: "1em",
+          height: "1em",
+          verticalAlign: "-0.15em",
+          fill: "currentColor",
+          overflow: "hidden"
+        }}
+        aria-hidden="true"
+      >
+        <use xlinkHref={`#${type}`}></use>
+      </svg>
+    ) : (
+      <i className={`{3} ${type} ${className}`} {...restProps} />
+    );
   }
 }
