@@ -2,11 +2,12 @@
 
 # 动机
 
-- 组件化 Icon，由 iconfont.cn 自动生成强类型 Icon Component
+- 组件化 Icon，由 iconfont.cn 自动生成强类型 Icon Component，并支持 svg。
 
 # 参数
 
 - namespace: 唯一标识，默认值为 iconfont
+- iconJsPath: js 生成路径，用于 svg 的使用
 - iconCssPath: css 生成路径
 - iconFontFilePath: font 文件生成路径
 - iconComponentPath: 组件生成路径
@@ -43,17 +44,14 @@
   ```
 
   - package.json 新增 script: node icon.js
-  - 生成 icon：命令行输入`yarn icon [iconfont.css]`. e.g: `yarn icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css`
+  - 生成 icon：命令行输入`yarn icon [iconfont url]`. e.g: `yarn icon //at.alicdn.com/t/font_1076605_p8g2n70z31.css` or `yarn icon //at.alicdn.com/t/font_1076605_p8g2n70z31.js` or `yarn icon //at.alicdn.com/t/font_1076605_p8g2n70z31`
 
-- 使用：引用组件 Icon
+- 组件 Icon 的引入
 
   ```
   import Icon, { IconClass } from '@/components/Icon'
   function IconSample(){
     return <Icon type={IconClass.MENU} />
   }
+  // 如果需要使用svg的形式 props中添加参数symbol，eg: <Icon type={IconClass.MENU} symbol/>
   ```
-
-# TODO
-
-- 支持 svg
