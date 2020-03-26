@@ -53,5 +53,5 @@
   function IconSample(){
     return <Icon type={IconClass.MENU} />
   }
-  // 如果需要使用svg的形式 props中添加参数symbol，eg: <Icon type={IconClass.MENU} symbol/>
+  // 如果需要使用svg的形式 props中添加参数symbol，且需要手动引入iconJsPath生成的文件，eg: <Icon type={IconClass.MENU} symbol/>
   ```
