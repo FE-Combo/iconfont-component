@@ -33,7 +33,7 @@ export default class Component extends React.PureComponent<Props> {
         }}
         aria-hidden="true"
       >
-        <use xlinkHref={`#${type}`}></use>
+        <use xlinkHref={`#${type}`} />
       </svg>
     ) : (
       <i className={`{3} ${type} ${className}`} {...restProps} />
