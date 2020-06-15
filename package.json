@@ -1,6 +1,6 @@
 {
   "name": "iconfont-component",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Automatically generate components based on iconfont.cn",
   "main": "src/index.js",
   "scripts": {
