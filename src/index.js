@@ -28,6 +28,7 @@ function analyzeCSS(content, config) {
   );
 
   // {1}: Icon types {2}: css url {3}: namespace
+  const cssImportPath = path.relative(path.join(componentPath, ".."), cssPath);
   const componentContent = fs
     .readFileSync(componentBoilerplatePath)
     .toString()
@@ -35,7 +36,10 @@ function analyzeCSS(content, config) {
       "// {1}",
       classList.map((_) => `${classNameToEnum(_, config)} = "${_}",`).join("\n")
     )
-    .replace("{2}", path.relative(path.join(componentPath, ".."), cssPath))
+    .replace(
+      "{2}",
+      cssImportPath.startsWith("../") ? cssImportPath : `./${cssImportPath}`
+    )
     .replace(/\{3\}/g, namespace);
 
   // Process URLs (assets)
