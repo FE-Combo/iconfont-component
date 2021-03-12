@@ -1,11 +1,8 @@
 {
-  "name": "icon-cli",
-  "version": "0.0.1",
+  "name": "iconfont-component",
+  "version": "0.0.13",
   "description": "Automatically generate components based on iconfont.cn",
   "main": "src/index.js",
-  "bin": {
-    "icon": "./index.js"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

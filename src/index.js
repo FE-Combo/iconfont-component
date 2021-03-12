@@ -23,26 +23,30 @@ function analyzeCSS(content, config) {
     throw new Error(
       `Error occurred, it perhaps caused by wrong configuration of iconfont.cn, please check: 1."fontclass / symbol prefix" must be ${config.namespace}-; 2."Font Family" must be ${config.namespace}`
     );
-  const classList = contentMatchIcon.map(_ =>
+  const classList = contentMatchIcon.map((_) =>
     _.substr(1).replace(":before", "")
   );
 
   // {1}: Icon types {2}: css url {3}: namespace
+  const cssImportPath = path.relative(path.join(componentPath, ".."), cssPath);
   const componentContent = fs
     .readFileSync(componentBoilerplatePath)
     .toString()
     .replace(
       "// {1}",
-      classList.map(_ => `${classNameToEnum(_, config)} = "${_}",`).join("\n")
+      classList.map((_) => `${classNameToEnum(_, config)} = "${_}",`).join("\n")
     )
-    .replace("{2}", path.relative(path.join(componentPath, ".."), cssPath))
+    .replace(
+      "{2}",
+      cssImportPath.startsWith("../") ? cssImportPath : `./${cssImportPath}`
+    )
     .replace(/\{3\}/g, namespace);
 
   // Process URLs (assets)
   const assetIconRegex = new RegExp(`\\.${namespace}-(.|\\n)*?\\}`, "g");
   const assetURLs = content
     .match(/url\('(.|\n)*?'\)/g)
-    .map(_ => _.substring(5, _.length - 2));
+    .map((_) => _.substring(5, _.length - 2));
   // {1}: fonts url {2}: icon style {3}: namespace
   const cssContent = fs
     .readFileSync(cssBoilerplatePath)
@@ -50,8 +54,8 @@ function analyzeCSS(content, config) {
     .replace(
       `'{1}'`,
       assetURLs
-        .map(url => transformToLocalURL(url, config))
-        .filter(_ => _)
+        .map((url) => transformToLocalURL(url, config))
+        .filter((_) => _)
         .join(",")
     )
     .replace(`// {2}`, content.match(assetIconRegex).join("\n"))
@@ -70,7 +74,7 @@ function analyzeCSS(content, config) {
 function generatePreviewHtml(iconList, cssURL, config) {
   const { htmlPath, namespace } = config;
   const icons = iconList.map(
-    _ =>
+    (_) =>
       `<div class="item"><i class="iconfont ${_}"></i><span>${classNameToEnum(
         _,
         config
@@ -134,11 +138,13 @@ function getExtension(url) {
 
 async function downloadFontAsset(url, fileName, config) {
   const { assetFolderPath } = config;
-  if (!fs.existsSync(assetFolderPath)) {
-    fs.mkdirSync(assetFolderPath);
+
+  // Why not use mkdirSync: deep directory will not be created
+  const path = assetFolderPath + "/" + fileName;
+  if (!checkIfExistsFile(path)) {
+    fs.createFileSync(path);
   }
 
-  const path = assetFolderPath + "/" + fileName;
   if (url.startsWith("//")) url = "http:" + url;
   const response = await axios({ url, responseType: "stream" });
   response.data.pipe(fs.createWriteStream(path));
@@ -151,7 +157,7 @@ async function downloadFontAsset(url, fileName, config) {
 async function getContent(url) {
   if (url.startsWith("//")) url = "http:" + url;
   const response = await axios.get(url, {
-    httpsAgent: new Agent({ rejectUnauthorized: false })
+    httpsAgent: new Agent({ rejectUnauthorized: false }),
   });
   return response.data;
 }
@@ -162,7 +168,7 @@ function spawn(command, arguments) {
     isWindows ? command + ".cmd" : command,
     arguments,
     {
-      stdio: "inherit"
+      stdio: "inherit",
     }
   );
   if (result.error) {
@@ -179,37 +185,26 @@ function spawn(command, arguments) {
   }
 }
 
-function getConfig() {
-  try {
-    const config = fs.readFileSync(process.cwd() + "/.iconrc.json");
-    return JSON.parse(config);
-  } catch (error) {
-    console.error(chalk`{red.bold ❌ Error: Uninitialized .iconrc.json}`);
-  }
-}
-
-function getConfigPath(url) {
-  return url ? path.resolve(process.cwd(), url) : undefined;
-}
-
 async function generate() {
   console.info(chalk`{white.bold usage:} 🎈 yarn icon \{icon-font-css-url\}`);
-  const cssURL = yargs.argv._[0];
+  const url = yargs.argv._[0];
 
   try {
-    if (!cssURL) throw new Error("Missing CSS URL in command line");
-    // TODO: check params if null
+    if (!url) throw new Error("Missing CSS URL in command line");
 
-    const configJSON = getConfig();
+    const cssURL = url.replace(/(\.css)|(\.js)$/, "").concat(".css");
+    const jsURL = url.replace(/(\.css)|(\.js)$/, "").concat(".js");
+
+    // TODO: check params if null
     const config = {
-      namespace: configJSON.namespace || "iconfont",
-      cssPath: getConfigPath(configJSON.iconCssPath),
-      assetFolderPath: getConfigPath(configJSON.iconFontFilePath),
-      componentPath: getConfigPath(configJSON.iconComponentPath),
-      htmlPath: getConfigPath(configJSON.iconHTMLPath),
+      namespace: env.namespace || "iconfont",
+      jsPath: env.iconJsPath,
+      cssPath: env.iconCssPath,
+      assetFolderPath: env.iconFontFilePath,
+      componentPath: env.iconComponentPath,
+      htmlPath: env.iconHTMLPath,
       prettierConfig:
-        getConfigPath(configJSON.prettierConfig) ||
-        path.resolve(__dirname, "../prettier.json")
+        env.prettierConfig || path.resolve(__dirname, "../prettier.json"),
     };
 
     const cssContent = await getContent(cssURL);
@@ -218,6 +213,13 @@ async function generate() {
     console.info(
       chalk`{white.bold 😍 Generated ${iconClassList.length} icons}`
     );
+
+    const jsContent = await getContent(jsURL);
+    console.info(chalk`{white.bold 😍 JS file content loaded}`);
+    if (config.jsPath) {
+      fs.writeFileSync(config.jsPath, jsContent);
+      console.info(chalk`{white.bold 😍 Generated JS}`);
+    }
 
     if (config.htmlPath) {
       generatePreviewHtml(iconClassList, cssURL, config);
@@ -228,13 +230,13 @@ async function generate() {
       "--config",
       config.prettierConfig,
       "--write",
-      config.cssPath
+      config.cssPath,
     ]);
     spawn("prettier", [
       "--config",
       config.prettierConfig,
       "--write",
-      config.componentPath
+      config.componentPath,
     ]);
     console.info(chalk`{white.bold 💕 Format generated files}`);
   } catch (e) {
