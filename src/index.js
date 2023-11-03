@@ -29,6 +29,11 @@ function analyzeCSS(content, config) {
 
   // {1}: Icon types {2}: css url {3}: namespace
   const cssImportPath = path.relative(path.join(componentPath, ".."), cssPath);
+  
+  if (!checkIfExistsFile(cssPath)) {
+    fs.createFileSync(cssPath);
+  }
+
   const componentContent = fs
     .readFileSync(componentBoilerplatePath)
     .toString()
@@ -185,7 +190,7 @@ function spawn(command, arguments) {
   }
 }
 
-async function generate() {
+async function generate(env) {
   console.info(chalk`{white.bold usage:} 🎈 yarn icon \{icon-font-css-url\}`);
   const url = yargs.argv._[0];
 
@@ -245,4 +250,4 @@ async function generate() {
   }
 }
 
-generate();
+module.exports = generate;
