@@ -1,15 +1,21 @@
 {
   "name": "iconfont-component",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Automatically generate components based on iconfont.cn",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "release": "standard-version",
+    "release:alpha": "standard-version --prerelease alpha",
+    "release:beta": "standard-version --prerelease beta",
+    "release:major": "standard-version --release-as major",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch"
   },
   "author": "vocoWone",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "12.6.1"
+    "@types/node": "12.6.1",
+    "standard-version": "^9.5.0"
   },
   "dependencies": {
     "axios": "0.19.0",
