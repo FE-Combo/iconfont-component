@@ -20,7 +20,7 @@ export default class Component extends React.PureComponent<Props> {
   };
 
   render() {
-    const { type, symbol, className = "", ...restProps } = this.props;
+    const { type, symbol, className = "", style, ...restProps } = this.props;
     return symbol ? (
       <svg
         className={`{3} ${className}`}
@@ -29,14 +29,16 @@ export default class Component extends React.PureComponent<Props> {
           height: "1em",
           verticalAlign: "-0.15em",
           fill: "currentColor",
-          overflow: "hidden"
+          overflow: "hidden",
+          ...style
         }}
         aria-hidden="true"
+        {...restProps}
       >
         <use xlinkHref={`#${type}`} />
       </svg>
     ) : (
-        <i className={`{3} ${type} ${className}`} {...restProps} />
+        <i className={`{3} ${type} ${className}`} style={style} {...restProps} />
       );
   }
 }
