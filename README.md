@@ -18,7 +18,7 @@
 - font-family 的命名必须为 [namespace]
 - FontClass/Symbol 前缀必须为 [namespace]-
 - icon 命名连接符使用-, e.g: arrow-left、arrow-right
-- 组件不能使用数字开头的命名方式, e.g: 666-error(❎)、ok-666(✅)、o666k(✅)
+- 组件不能使用数字开头的命名方式, e.g: 666-error(❌)、ok-666(✅)、o666k(✅)
 
 # 使用
 
